@@ -1,4 +1,4 @@
-# react-twilio-starter
+# react-twilio-callcenter
 This application will serve as a getting started application for building a Twilio powered multi channel contact center using React and Redux on the front end and Node.js on the backend.  The backend can be swapped out to use whichever server side technology or framework you choose.
 
 ## Setup
@@ -29,4 +29,3 @@ npm run dev-server //in diff terminal
 
 ## Components
 Components are organized into Container components and functional presentation components.  Container components contain all of the Twilio specific code along with the actions and reducers.  The presentation componets are functional and only handle layout.  Any front end framework can be used with these components.  Funcitonal components that need a container handler are named the same with the Container component having the Container at the end of the name.
-# react-twilio-callcenter
