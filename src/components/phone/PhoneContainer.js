@@ -15,11 +15,6 @@ const mapStateToProps = (state) => {
     caller = taskrouter.conference.participants.customer
   }
   const reservation = taskrouter.reservations[0]
-
-  console.log('taskrouter -->', taskrouter);
-  console.log('taskrouter.conference -->', taskrouter.conference);
-  console.log('taskrouter.reservations -->', taskrouter.reservations);
-  console.log('reservation -->', reservation);
   console.log(phone.currentCall)
   return {
     status: phone.currentCall._status,

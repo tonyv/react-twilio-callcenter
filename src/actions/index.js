@@ -38,7 +38,6 @@ function reservationCreated(reservation) {
 }
 
 function reservationAccepted(reservation) {
-  console.log('dispatching reservationAccepted')
   return {
     type: 'RESERVATION_ACCEPTED',
     reservation: reservation
