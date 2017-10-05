@@ -4,11 +4,11 @@ import CallControl from './CallControl';
 
 import React, { PropTypes } from 'react';
 
-const Phone = ({status, onMuteClick, onKeyPadNumberClick, onNumberEntryChange, onHangupClick, onCallClick, onTransferClick, onHoldClick, muted, callSid, confSid, reservation}) => (
+const Phone = ({status, onMuteClick, onKeyPadNumberClick, onNumberEntryChange, onHangupClick, onCallClick, onTransferClick, onHoldClick, muted, callOnHold, callSid, confSid, reservation}) => (
   <div id="dialer">
     <NumberEntry entry={onNumberEntryChange} />
     <KeyPad buttonPress={onKeyPadNumberClick} />
-    <CallControl call={onCallClick} status={status} muted={ muted } hangup={onHangupClick} mute={ onMuteClick } transfer={ onTransferClick } hold={ onHoldClick } callSid={callSid} confSid={confSid} reservation={reservation}/>
+    <CallControl call={onCallClick} status={status} hangup={onHangupClick} muted={ muted } mute={ onMuteClick } transfer={ onTransferClick } callOnHold={ callOnHold } hold={ onHoldClick } callSid={callSid} confSid={confSid} reservation={reservation}/>
   </div>
 )
 

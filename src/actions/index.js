@@ -127,9 +127,7 @@ export function requestWorker(workerSid) {
           dispatch(reservationCreated(reservation))
           switch (reservation.task.taskChannelUniqueName) {
             case 'voice':
-              console.log('CREATING CONFERENCE ON RESERVATION')
               reservation.conference()
-              console.log('reservation conference', reservation)
               break
             case 'chat':
               //reservation.accept()
@@ -181,6 +179,13 @@ function registerPhoneDevice() {
 function phoneMuted(boolean) {
   return {
     type: 'PHONE_MUTED',
+    boolean: boolean
+  }
+}
+
+function callOnHold(boolean) {
+  return {
+    type: 'CALL_ON_HOLD',
     boolean: boolean
   }
 }
@@ -253,8 +258,13 @@ export function requestPhone(clientName) {
 // }
 
 export function phoneHold(confSid, callSid) {
+  console.log('fetching phoneHold endpoint')
+
   return(dispatch, getState) => {
-    return fetch(`/api/calls/conference/${confSid}/hold/${callSid}/true`,{method: "POST"})
+    const { phone } = getState()
+    dispatch(callOnHold(!phone.callOnHold))
+
+    return fetch(`/api/calls/conference/${confSid}/hold/${callSid}/${!phone.callOnHold}`,{method: "POST"})
       .then(response => response.json())
       .then( json => {
         console.log(json)
