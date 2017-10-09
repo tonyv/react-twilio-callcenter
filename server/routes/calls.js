@@ -80,6 +80,17 @@ router.get('/conference/:conference_sid/participant', function(req, res) {
   // res.send({});
 });
 
+router.post('/transfers/external', function(req, res) {
+  const client = require('twilio')(config.accountSid, config.authToken);
+
+  client
+    .conferences(req.body.confName)
+    .participants.create({
+      to: req.body.phoneNumber,
+      from: '+15304412022',
+    }).then(participant => console.log(participant.sid));
+});
+
 router.post('/transfer', function(req, res) {
   const client = require('twilio')(config.accountSid, config.authToken);
 

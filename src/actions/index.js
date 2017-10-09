@@ -128,12 +128,17 @@ export function requestWorker(workerSid) {
           switch (reservation.task.taskChannelUniqueName) {
             case 'voice':
               if (reservation.task.attributes.type == 'transfer') {
-                console.log('TRANSFER CALL ==>', reservation.task.attributes)
                 reservation.call('15304412022',
                                  'https://041531b6.ngrok.io/api/calls/conference/' + reservation.task.attributes.confName + '/participant',
                                  null,
                                  'true')
-              } else {
+              }
+              else if (reservation.workerName == 'Voicemail'){
+                reservation.redirect(reservation.task.attributes.call_sid,
+                                     'https://webhooks.twilio.com/v1/Accounts/ACe707310a5638a28758daa8b507f1a448/Flows/FW17f8f9c05cb9f595e826225601ba9be6',
+                                     'true')
+              }
+              else {
                 reservation.conference()
               }
               break
@@ -302,6 +307,25 @@ export function phoneTransfer(confName) {
         },
         method: "POST",
         body: JSON.stringify({ client: 'tvu', confName: confName })
+      })
+      .then(response => response.json())
+      .then( json => {
+        console.log(json)
+      })
+  }
+}
+
+export function externalTransfer(confName, phoneNumber) {
+
+  return (dispatch, getState) => {
+    return fetch(`/api/calls/transfers/external`,
+      {
+        headers: {
+         'Accept': 'application/json',
+         'Content-Type': 'application/json'
+        },
+        method: "POST",
+        body: JSON.stringify({ phoneNumber: phoneNumber, confName: confName })
       })
       .then(response => response.json())
       .then( json => {
