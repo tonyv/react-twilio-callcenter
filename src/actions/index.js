@@ -1,4 +1,5 @@
 import fetch from 'isomorphic-fetch'
+var config = require('../../twilio.config');
 
 // Actions to register the worker
 function registerWorker() {
@@ -135,7 +136,7 @@ export function requestWorker(workerSid) {
               }
               else if (reservation.workerName == 'Voicemail'){
                 reservation.redirect(reservation.task.attributes.call_sid,
-                                     'https://webhooks.twilio.com/v1/Accounts/ACe707310a5638a28758daa8b507f1a448/Flows/FW17f8f9c05cb9f595e826225601ba9be6',
+                                     'https://webhooks.twilio.com/v1/Accounts/' + config.accountSid + '/Flows/FW17f8f9c05cb9f595e826225601ba9be6',
                                      'true')
               }
               else {

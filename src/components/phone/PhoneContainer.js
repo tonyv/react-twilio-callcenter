@@ -39,7 +39,6 @@ const mapDispatchToProps = (dispatch) => {
       dispatch(phoneHold(confSid, callSid))
     },
     onTransferClick: (reservation) => {
-      console.log('reservation.taskSid -->', reservation.taskSid)
       dispatch(phoneTransfer(reservation.taskSid))
     },
     onExternalTransferClick: (reservation) => {
