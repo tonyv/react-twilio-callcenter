@@ -38,8 +38,9 @@ const mapDispatchToProps = (dispatch) => {
     onHoldClick: (confSid, callSid) => {
       dispatch(phoneHold(confSid, callSid))
     },
-    onTransferClick: (confSid) => {
-      dispatch(phoneTransfer(confSid))
+    onTransferClick: (reservation) => {
+      console.log('reservation.taskSid -->', reservation.taskSid)
+      dispatch(phoneTransfer(reservation.taskSid))
     },
     onCallClick: () => {
       dispatch(phoneCall())

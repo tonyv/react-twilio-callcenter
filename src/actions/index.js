@@ -127,7 +127,15 @@ export function requestWorker(workerSid) {
           dispatch(reservationCreated(reservation))
           switch (reservation.task.taskChannelUniqueName) {
             case 'voice':
-              reservation.conference()
+              if (reservation.task.attributes.type == 'transfer') {
+                console.log('TRANSFER CALL ==>', reservation.task.attributes)
+                reservation.call('15304412022',
+                                 'https://041531b6.ngrok.io/api/calls/conference/' + reservation.task.attributes.confName + '/participant',
+                                 null,
+                                 'true')
+              } else {
+                reservation.conference()
+              }
               break
             case 'chat':
               //reservation.accept()
@@ -282,12 +290,18 @@ export function phoneMute() {
   }
 }
 
-export function phoneTransfer(confSid) {
+export function phoneTransfer(confName) {
+  console.log('confName -->', confName)
+
   return (dispatch, getState) => {
     return fetch(`/api/calls/transfer`,
       {
+        headers: {
+         'Accept': 'application/json',
+         'Content-Type': 'application/json'
+        },
         method: "POST",
-        body: { "client": "tvu", "confSid": confSid }
+        body: JSON.stringify({ client: 'tvu', confName: confName })
       })
       .then(response => response.json())
       .then( json => {

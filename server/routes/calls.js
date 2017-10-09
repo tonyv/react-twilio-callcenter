@@ -6,7 +6,7 @@ var config = require('../../twilio.config');
 
 router.post('/', function(req, res) {
   const resp = new VoiceResponse();
-  const type = {dir: 'call', skill: 'skill_1'};
+  const type = {skill: 'customer_care', type: 'inbound' };
   const json = JSON.stringify(type);
 
   resp.enqueueTask({
@@ -64,8 +64,23 @@ router.post('/outbound/dial', function(req, res) {
     })
 });
 
+router.get('/conference/:conference_sid/participant', function(req, res) {
+  const client = require('twilio')(config.accountSid, config.authToken);
+
+  const resp = new VoiceResponse();
+  const dial = resp.dial();
+
+  dial.conference({
+    beep: true,
+    startConferenceOnEnter: true,
+    endConferenceOnExit: false
+  }, req.params.conference_sid);
+
+  res.send(resp.toString());
+  // res.send({});
+});
+
 router.post('/transfer', function(req, res) {
-  console.log('req', req);
   const client = require('twilio')(config.accountSid, config.authToken);
 
   client.taskrouter.v1
@@ -74,18 +89,14 @@ router.post('/transfer', function(req, res) {
     .create({
       workflowSid: config.workflowSid,
       taskChannel: 'voice',
-      attributes: '{"direction":"outbound", "type":"transfer", "client":"tvu"}',
+      attributes: JSON.stringify({direction:"outbound",
+                                  type:"transfer",
+                                  agent_id:"tony",
+                                  confName: req.body.confName}),
     }).then((task) => {
-      const resp = new VoiceResponse();
-      const dial = resp.dial();
-      dial.conference({
-        beep: false,
-        waitUrl: '',
-        startConferenceOnEnter: true,
-        endConferenceOnExit: true
-      }, task.sid);
-      res.send(resp.toString());
-    })
+      console.log(task);
+      res.send({});
+    });
 
   // res.send(resp.toString());
 
