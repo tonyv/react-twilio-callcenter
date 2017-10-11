@@ -99,8 +99,8 @@ export function requestWorker(workerSid) {
         dispatch(workerUpdated(worker))
         worker.on("ready", (worker) => {
           dispatch(workerUpdated(worker))
-          dispatch(requestChat('bcoyle'))
-          dispatch(requestPhone('bcoyle'))
+          dispatch(requestChat(worker.attributes.contact_uri.split(':')[1]))
+          dispatch(requestPhone(worker.attributes.contact_uri.split(':')[1]))
           console.log(worker)
         })
         worker.on('activity.update', (worker) => {
@@ -133,6 +133,9 @@ export function requestWorker(workerSid) {
                                  'https://041531b6.ngrok.io/api/calls/conference/' + reservation.task.attributes.confName + '/participant',
                                  null,
                                  'true')
+                // reservation.redirect(reservation.task.attributes.call_sid,
+                //                      'https://041531b6.ngrok.io/api/calls/conference/' + reservation.task.attributes.confName + '/participant',
+                //                      'true')
               }
               else if (reservation.workerName == 'Voicemail'){
                 reservation.redirect(reservation.task.attributes.call_sid,
@@ -297,7 +300,6 @@ export function phoneMute() {
 }
 
 export function phoneTransfer(confName) {
-  console.log('confName -->', confName)
 
   return (dispatch, getState) => {
     return fetch(`/api/calls/transfer`,

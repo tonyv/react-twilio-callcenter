@@ -23,7 +23,6 @@ class AgentWorkSpaceContainer extends Component {
     console.log("UNMOUNTING")
   }
 
-
   render() {
     const { channels, reservations, participant } = this.props
     let current = "default"
