@@ -128,7 +128,13 @@ export function requestWorker(workerSid) {
           dispatch(reservationCreated(reservation))
           switch (reservation.task.taskChannelUniqueName) {
             case 'voice':
-              reservation.conference()
+              if (reservation.workerName == 'Voicemail'){
+                reservation.redirect(reservation.task.attributes.call_sid,
+                                     'https://webhooks.twilio.com/v1/Accounts/' + config.accountSid + '/Flows/FW17f8f9c05cb9f595e826225601ba9be6',
+                                     'true')
+              } else {
+                reservation.conference()
+              }
               break
             case 'chat':
               //reservation.accept()
