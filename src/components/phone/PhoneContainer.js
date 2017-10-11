@@ -2,9 +2,8 @@
 
 import React from 'react';
 import Phone from './phone';
-import {phoneMute, phoneHangup, phoneButtonPushed, phoneHold, phoneTransfer, externalTransfer, phoneCall, dialPadUpdated} from '../../actions'
+import {phoneMute, phoneHangup, phoneButtonPushed, phoneHold, phoneTransfer, phoneCall, dialPadUpdated} from '../../actions'
 import { connect } from 'react-redux'
-
 
 const mapStateToProps = (state) => {
   const { phone, taskrouter } = state
@@ -40,10 +39,6 @@ const mapDispatchToProps = (dispatch) => {
     },
     onTransferClick: (reservation) => {
       dispatch(phoneTransfer(reservation.taskSid))
-    },
-    onExternalTransferClick: (reservation) => {
-      let phoneNumber = '+16263454232'
-      dispatch(externalTransfer(reservation.taskSid, phoneNumber))
     },
     onCallClick: () => {
       dispatch(phoneCall())
