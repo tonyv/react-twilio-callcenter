@@ -100,7 +100,6 @@ export function requestWorker(workerSid) {
         worker.on("ready", (worker) => {
           dispatch(workerUpdated(worker))
           dispatch(requestChat(worker.attributes.contact_uri.split(':')[1]))
-          dispatch(requestPhone(worker.attributes.contact_uri.split(':')[1]))
           console.log(worker)
         })
         worker.on('activity.update', (worker) => {
@@ -171,12 +170,6 @@ export function dialPadUpdated(number) {
   }
 }
 
-function registerPhoneDevice() {
-  return {
-    type: 'REGISTER_PHONE'
-  }
-}
-
 function phoneMuted(boolean) {
   return {
     type: 'PHONE_MUTED',
@@ -203,42 +196,6 @@ export function phoneConnectionUpdated(conn) {
     type: "PHONE_CONN_UPDATED",
     connection: conn
   }
-}
-
-export function requestPhone(clientName) {
-  return (dispatch, getState) => {
-    dispatch(registerPhoneDevice())
-    return fetch(`/api/tokens/phone/${clientName}`)
-      .then(response => response.text())
-      .then(text => {
-        Twilio.Device.setup(text)
-        Twilio.Device.ready((device) => {
-          console.log("phone is ready");
-          dispatch(phoneDeviceUpdated(device))
-        })
-        Twilio.Device.incoming(function(connection) {
-          connection.accept();
-        })
-        Twilio.Device.connect((conn) => {
-          console.log("incoming call")
-          console.log(conn._direction)
-          // Call is connected. Register callback for events to make sure UI is updated
-          conn.mute((boolean, connection) => {
-            dispatch(phoneMuted(boolean))
-          })
-          conn.on('warning', (warning) => {
-            dispatch(phoneWarning(warning))
-          })
-          conn.on('warning-cleared', (warning) => {
-            dispatch(phoneWarning(" "))
-          })
-	        dispatch(phoneConnectionUpdated(conn))
-		    })
-		    Twilio.Device.disconnect((conn) => {
-	        dispatch(phoneConnectionUpdated(null))
-        })
-      })
-    }
 }
 
 // export function requestHold(callSid) {
