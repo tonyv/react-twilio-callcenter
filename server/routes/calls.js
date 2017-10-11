@@ -27,19 +27,6 @@ router.post('/events', function(req, res) {
 
 });
 
-router.post('/conference/:conference_sid/hold/:call_sid/:toggle', function(req, res) {
-  const client = require('twilio')(config.accountSid, config.authToken);
-  const confSid = req.params.conference_sid
-  const callSid = req.params.call_sid
-  const toggle = req.params.toggle
-  client.api.accounts(config.accountSid)
-    .conferences(confSid)
-    .participants(callSid)
-    .update({hold: toggle})
-    .then((participant) => console.log(participant.hold))
-    .done();
-});
-
 router.post('/outbound/dial', function(req, res) {
 
   const client = require('twilio')(config.accountSid, config.authToken);

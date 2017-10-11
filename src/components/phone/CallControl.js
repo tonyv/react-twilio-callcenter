@@ -8,8 +8,6 @@ const CallControl = ({
   muted,
   mute,
   transfer,
-  hold,
-  callOnHold,
   callSid,
   confSid,
   reservation
@@ -21,7 +19,6 @@ const CallControl = ({
       <div>
         <Button onClick={hangup} classes={["hangup"]} buttonText="Hangup" />
         <Button onClick={mute} classes={["mute"]} buttonText={muted ? 'Unmute' : 'Mute' } />
-        <Button onClick={e => hold(confSid, callSid)} classes={["hold"]} buttonText={callOnHold ? 'Unhold' : 'Hold' } />
       </div>
   } else {
     buttons = <Button onClick={e => call()} classes={["call"]} buttonText="Call" />
@@ -39,8 +36,7 @@ CallControl.propTypes = {
   status: React.PropTypes.string.isRequired,
   hangup: React.PropTypes.func.isRequired,
   mute: React.PropTypes.func.isRequired,
-  muted: React.PropTypes.bool.isRequired,
-  callOnHold: React.PropTypes.bool.isRequired
+  muted: React.PropTypes.bool.isRequired
 }
 
 export default CallControl;

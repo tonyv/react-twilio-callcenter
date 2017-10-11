@@ -51,23 +51,6 @@ router.post('/outbound/dial', function(req, res) {
     })
 });
 
-router.post('/hold', function(req, res) {
-  const client = require('twilio')(config.accountSid, config.authToken);
-
-  // Get List of participants based on friendly name
-  // client
-  // .conferences('CFbbe4632a3c49700934481addd5ce1659')
-  // .participants.each(participant => console.log(participant.muted));
-
-  // Place participant on hold
-  client.api.accounts(config.accountSid)
-  .conferences(config.accountSid)
-  .participants('CAXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
-  .update({hold: 'true'})
-  .then((participant) => console.log(participant.hold))
-  .done();
-});
-
 router.post('/transfer', function(req, res) {
   const client = require('twilio')(config.accountSid, config.authToken);
 

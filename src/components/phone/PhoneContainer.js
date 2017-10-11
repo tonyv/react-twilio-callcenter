@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Phone from './phone';
-import {phoneMute, phoneHangup, phoneButtonPushed, phoneHold, phoneTransfer, phoneCall, dialPadUpdated} from '../../actions'
+import {phoneMute, phoneHangup, phoneButtonPushed, phoneTransfer, phoneCall, dialPadUpdated} from '../../actions'
 import { connect } from 'react-redux'
 
 const mapStateToProps = (state) => {
@@ -20,7 +20,6 @@ const mapStateToProps = (state) => {
     muted: phone.muted,
     callSid: caller,
     confSid: conf,
-    callOnHold: phone.callOnHold,
     reservation: reservation,
     warning: phone.warning
   }
@@ -33,9 +32,6 @@ const mapDispatchToProps = (dispatch) => {
     },
     onHangupClick: () => {
       dispatch(phoneHangup())
-    },
-    onHoldClick: (confSid, callSid) => {
-      dispatch(phoneHold(confSid, callSid))
     },
     onCallClick: () => {
       dispatch(phoneCall())

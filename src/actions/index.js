@@ -184,13 +184,6 @@ function phoneMuted(boolean) {
   }
 }
 
-function callOnHold(boolean) {
-  return {
-    type: 'CALL_ON_HOLD',
-    boolean: boolean
-  }
-}
-
 function phoneWarning(warning) {
   return {
     type: 'PHONE_WARNING',
