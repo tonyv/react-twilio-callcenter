@@ -128,15 +128,7 @@ export function requestWorker(workerSid) {
           dispatch(reservationCreated(reservation))
           switch (reservation.task.taskChannelUniqueName) {
             case 'voice':
-              if (reservation.task.attributes.type == 'transfer') {
-                reservation.call('15304412022',
-                                 'https://041531b6.ngrok.io/api/calls/conference/' + reservation.task.attributes.confName + '/participant',
-                                 null,
-                                 'true')
-              }
-              else {
-                reservation.conference()
-              }
+              reservation.conference()
               break
             case 'chat':
               //reservation.accept()
@@ -288,26 +280,6 @@ export function phoneMute() {
     console.log("Current call is muted? " + phone.currentCall.isMuted())
 
     phone.currentCall.mute(!phone.currentCall.isMuted())
-  }
-}
-
-export function phoneTransfer(confName) {
-  console.log('confName -->', confName)
-
-  return (dispatch, getState) => {
-    return fetch(`/api/calls/transfer`,
-      {
-        headers: {
-         'Accept': 'application/json',
-         'Content-Type': 'application/json'
-        },
-        method: "POST",
-        body: JSON.stringify({ client: 'tvu', confName: confName })
-      })
-      .then(response => response.json())
-      .then( json => {
-        console.log(json)
-      })
   }
 }
 

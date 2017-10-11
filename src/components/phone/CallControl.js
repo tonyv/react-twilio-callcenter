@@ -22,7 +22,6 @@ const CallControl = ({
         <Button onClick={hangup} classes={["hangup"]} buttonText="Hangup" />
         <Button onClick={mute} classes={["mute"]} buttonText={muted ? 'Unmute' : 'Mute' } />
         <Button onClick={e => hold(confSid, callSid)} classes={["hold"]} buttonText={callOnHold ? 'Unhold' : 'Hold' } />
-        <Button onClick={e => transfer(reservation)} classes={["transfer"]} buttonText="Transfer"/>
       </div>
   } else {
     buttons = <Button onClick={e => call()} classes={["call"]} buttonText="Call" />
