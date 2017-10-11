@@ -1,13 +1,6 @@
 import fetch from 'isomorphic-fetch'
 var config = require('../../twilio.config');
 
-// Actions to register the worker
-function registerWorker() {
-  return {
-    type: 'REGISTER_WORKER',
-  }
-}
-
 export function workerUpdated(worker) {
   return {
     type: 'WORKER_UPDATED',
