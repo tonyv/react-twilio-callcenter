@@ -9,8 +9,7 @@ const CallControl = ({
   mute,
   transfer,
   callSid,
-  confSid,
-  reservation
+  confSid
 }) => {
   let buttons
   if (status == "open") {

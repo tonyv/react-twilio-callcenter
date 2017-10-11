@@ -8,58 +8,6 @@ export function workerUpdated(worker) {
   }
 }
 
-export function currentActivityFetch(worker) {
-  return ( dispatch, getState ) => {
-    worker.fetchReservations((error, reservations) => {
-      dispatch(reservationsUpdated(reservations.data))
-    })
-  }
-}
-
-export function reservationsFetch(worker) {
-  return ( dispatch, getState ) => {
-    worker.fetchReservations((error, reservations) => {
-      dispatch(reservationsUpdated(reservations.data))
-    })
-  }
-}
-
-function reservationCreated(reservation) {
-  return {
-    type: 'RESERVATION_CREATED',
-    reservation: reservation
-  }
-}
-
-function reservationAccepted(reservation) {
-  return {
-    type: 'RESERVATION_ACCEPTED',
-    reservation: reservation
-  }
-}
-
-function reservationsUpdated(data) {
-  return {
-    type: 'RESERVATIONS_UPDATED',
-    reservations: data
-  }
-}
-
-
-export function requestAcceptReservation() {
-  return (dispatch, getState) => {
-    const { taskrouter } = getState()
-    let requestedActivitySid = getActivitySid(taskrouter.activities, newStateName)
-    taskrouter.worker.update("ActivitySid", requestedActivitySid, (error, worker) => {
-      if (error) {
-        console.log(error);
-      } else {
-        dispatch(workerUpdated(worker))
-      }
-    })
-  }
-}
-
 export function requestStateChange(newStateName) {
   return (dispatch, getState) => {
     const { taskrouter } = getState()
