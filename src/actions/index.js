@@ -99,8 +99,8 @@ export function requestWorker(workerSid) {
         dispatch(workerUpdated(worker))
         worker.on("ready", (worker) => {
           dispatch(workerUpdated(worker))
-          dispatch(requestChat('bcoyle'))
-          dispatch(requestPhone('bcoyle'))
+          dispatch(requestChat(worker.attributes.contact_uri.split(':')[1]))
+          dispatch(requestPhone(worker.attributes.contact_uri.split(':')[1]))
           console.log(worker)
         })
         worker.on('activity.update', (worker) => {
