@@ -1,6 +1,5 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
-import {requestWorker} from '../../actions'
 
 import AgentWorkSpace from './AgentWorkSpace'
 
@@ -14,9 +13,6 @@ class AgentWorkSpaceContainer extends Component {
   componentDidMount() {
     // When this top level component loads get the worker sid from the URL
     const { dispatch } = this.props
-    var url = new URL(window.location.href)
-    console.log(url.searchParams.get("worker"))
-    dispatch(requestWorker(url.searchParams.get("worker")))
   }
 
   componentWillUnmount() {

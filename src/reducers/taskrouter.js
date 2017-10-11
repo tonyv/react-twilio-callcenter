@@ -1,7 +1,6 @@
 
 const taskrouter = (state = {
   isRegistering: false,
-  worker: {},
   activities: [],
   channels: [],
   reservations: [],
@@ -9,19 +8,6 @@ const taskrouter = (state = {
 }, action) => {
   console.log(action.type)
   switch (action.type) {
-    case 'REGISTER_WORKER':
-      return Object.assign({}, state, {
-        isRegistering: true
-      });
-    case 'WORKER_UPDATED':
-      return Object.assign({}, state, {
-        isRegistering: false,
-        worker: action.worker
-      });
-    case 'ACTIVITIES_UPDATED':
-      return Object.assign({}, state, {
-        activities: action.activities
-      });
     case 'CHANNELS_UPDATED':
       return Object.assign({}, state, {
         channels: action.channels
