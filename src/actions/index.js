@@ -8,27 +8,6 @@ export function workerUpdated(worker) {
   }
 }
 
-export function requestStateChange(newStateName) {
-  return (dispatch, getState) => {
-    const { taskrouter } = getState()
-    let requestedActivitySid = getActivitySid(taskrouter.activities, newStateName)
-    taskrouter.worker.update("ActivitySid", requestedActivitySid, (error, worker) => {
-      if (error) {
-        console.log(error);
-      } else {
-        dispatch(workerUpdated(worker))
-      }
-    })
-  }
-}
-
-function activitiesUpdated(activities) {
-  return {
-    type: 'ACTIVITIES_UPDATED',
-    activities: activities
-  }
-}
-
 function channelsUpdated(channels) {
   return {
     type: 'CHANNELS_UPDATED',
@@ -226,9 +205,4 @@ export function videoRequest(task) {
       })
 
   }
-}
-
-const getActivitySid = (activities, activityName) => {
-  return activities.find((activity) =>
-    activity.friendlyName == activityName).sid;
 }
