@@ -14,7 +14,6 @@ router.post('/', function(req, res) {
   }).task({priority: '1'}, json)
 
   res.send(resp.toString());
-
 });
 
 router.post('/events', function(req, res) {
@@ -64,24 +63,23 @@ router.post('/outbound/dial', function(req, res) {
     })
 });
 
-router.get('/conference/:conference_sid/participant', function(req, res) {
+router.post('/conference/:conference_sid/participant', function(req, res) {
   const client = require('twilio')(config.accountSid, config.authToken);
 
   const resp = new VoiceResponse();
   const dial = resp.dial();
 
-  // dial.conference({
-  //   beep: true,
-  //   startConferenceOnEnter: true,
-  //   endConferenceOnExit: false
-  // }, req.params.conference_sid);
-  client
-    .conferences(req.body.conference_sid)
-    .participants.create({
-      to: 'tvu',
-      from: '+15304412022',
-    }).then(participant => console.log(participant.sid));
-
+  dial.conference({
+    beep: true,
+    startConferenceOnEnter: true,
+    endConferenceOnExit: false
+  }, req.params.conference_sid);
+  // client
+  //   .conferences(req.body.conference_sid)
+  //   .participants.create({
+  //     to: 'tvu',
+  //     from: '+15304412022',
+  //   }).then(participant => console.log(participant.sid));
 
   res.send(resp.toString());
   // res.send({});
