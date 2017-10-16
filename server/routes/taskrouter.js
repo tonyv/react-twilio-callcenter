@@ -100,7 +100,6 @@ router.post('/assignment', function(req, res) {
     });
   }
  */
-
 });
 
 router.post('/event', function(req, res) {
