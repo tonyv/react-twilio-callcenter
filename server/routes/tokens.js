@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const _ = require('lodash');
 
+const ClientCapability = require('twilio').jwt.ClientCapability;
 const AccessToken = require('twilio').jwt.AccessToken;
 const TaskRouterCapability = require('twilio').jwt.taskrouter.TaskRouterCapability;
 const Policy = TaskRouterCapability.Policy;
@@ -66,6 +67,22 @@ function buildWorkspacePolicy(options) {
     allow: true
   });
 }
+
+router.get('/phone/:name', function(req, res) {
+  const clientName = req.params.name;
+  console.log("register phone", clientName);
+  const capability = new ClientCapability({
+      accountSid: config.accountSid,
+      authToken: config.authToken,
+  });
+  capability.addScope(new ClientCapability.IncomingClientScope(clientName));
+  capability.addScope(
+    new ClientCapability.OutgoingClientScope({applicationSid: config.twimlApp})
+  );
+  res.send(capability.toJwt());
+});
+
+
 
 router.get('/chat/:name/:endpoint', function(req, res) {
   const clientName = req.params.name;

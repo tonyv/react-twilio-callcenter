@@ -2,12 +2,17 @@ const phone = (state = {
   currentCall: false,
   device: {},
   muted: false,
+  callOnHold: false,
   warning: "",
   isRegistered: false,
   dialPadNumber: "",
 }, action) => {
   console.log(action.type)
   switch (action.type) {
+    case 'REGISTER_PHONE':
+      return Object.assign({}, state, {
+        isRegistered: false
+      });
     case 'PHONE_DEVICE_UPDATED':
       return Object.assign({}, state, {
         isRegistered: true,
@@ -24,6 +29,11 @@ const phone = (state = {
     case 'PHONE_MUTED':
       return Object.assign({}, state, {
         muted: action.boolean
+      });
+    case 'CALL_ON_HOLD':
+      console.log('action.boolean ->', action.boolean)
+      return Object.assign({}, state, {
+        callOnHold: action.boolean
       });
     case 'PHONE_WARNING':
       return Object.assign({}, state, {
