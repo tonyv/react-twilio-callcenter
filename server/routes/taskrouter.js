@@ -67,7 +67,7 @@ router.post('/assignment', function(req, res) {
     if (workerAttributes["skills"][0] == 'voicemail') {
       instructions = {"instruction": "redirect",
                       "call_sid": taskAttributes.call_sid,
-                      "url": 'https://webhooks.twilio.com/v1/Accounts/' + config.accountSid + '/Flows/FW17f8f9c05cb9f595e826225601ba9be6'}
+                      "url": 'https://handler.twilio.com/twiml/EHdc2173198e8793cecd40420c94e562d4'}
     }
   }
 
