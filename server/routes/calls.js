@@ -14,7 +14,6 @@ router.post('/', function(req, res) {
   }).task({priority: '1'}, json)
 
   res.send(resp.toString());
-
 });
 
 router.post('/events', function(req, res) {

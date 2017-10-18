@@ -12,7 +12,7 @@ const taskrouter = (state = {
     case 'REGISTER_WORKER':
       return Object.assign({}, state, {
         isRegistering: true
-      });		
+      });
     case 'WORKER_UPDATED':
       return Object.assign({}, state, {
         isRegistering: false,
@@ -37,7 +37,7 @@ const taskrouter = (state = {
           action.reservation
         ],
         conference: action.reservation.task.attributes.conference
-     });
+      });
     case 'RESERVATION_ACCEPTED':
       return Object.assign({}, state, {
         conference: action.reservation.task.attributes.conference

@@ -12,8 +12,15 @@ const mapStateToProps = (state) => {
 }
 
 const mapDispatchToProps = (dispatch) => {
+  return {
+    onRequestAccept: (reservation) => {
+      dispatch(requestAcceptReservation(reservation))
+    },
+    onRequestDecline: (reservation) => {
+      dispatch(requestDeclineReservation(reservation))
+    }
+  }
 }
-
 
 const SimpleAgentStatusControlsContainer = connect(
   mapStateToProps,

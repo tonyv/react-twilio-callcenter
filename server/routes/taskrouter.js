@@ -5,7 +5,8 @@ var twilio = require('twilio');
 var config = require('../../twilio.config');
 
 router.post('/assignment', function(req, res) {
-
+  var instructions = {};
+  res.send(instructions)
 });
 
 router.post('/event', function(req, res) {

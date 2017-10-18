@@ -8,6 +8,10 @@ const phone = (state = {
 }, action) => {
   console.log(action.type)
   switch (action.type) {
+    case 'REGISTER_PHONE':
+      return Object.assign({}, state, {
+        isRegistered: false
+      });
     case 'PHONE_DEVICE_UPDATED':
       return Object.assign({}, state, {
         isRegistered: true,

@@ -1,7 +1,6 @@
 import fetch from 'isomorphic-fetch'
 var config = require('../../twilio.config');
 
-
 // Actions to register the worker
 function registerWorker() {
   return {
@@ -16,106 +15,146 @@ export function workerUpdated(worker) {
   }
 }
 
+export function currentActivityFetch(worker) {
+  return ( dispatch, getState ) => {
+    worker.fetchReservations((error, reservations) => {
+      dispatch(reservationsUpdated(reservations.data))
+    })
+  }
+}
+
+export function reservationsFetch(worker) {
+  return ( dispatch, getState ) => {
+    worker.fetchReservations((error, reservations) => {
+      dispatch(reservationsUpdated(reservations.data))
+    })
+  }
+}
+
+function reservationCreated(reservation) {
+  return {
+    type: 'RESERVATION_CREATED',
+    reservation: reservation
+  }
+}
+
+function reservationAccepted(reservation) {
+  return {
+    type: 'RESERVATION_ACCEPTED',
+    reservation: reservation
+  }
+}
+
+function reservationsUpdated(data) {
+  return {
+    type: 'RESERVATIONS_UPDATED',
+    reservations: data
+  }
+}
+
+
+export function requestAcceptReservation() {
+  return (dispatch, getState) => {
+    const { taskrouter } = getState()
+    let requestedActivitySid = getActivitySid(taskrouter.activities, newStateName)
+    taskrouter.worker.update("ActivitySid", requestedActivitySid, (error, worker) => {
+      if (error) {
+        console.log(error);
+      } else {
+        dispatch(workerUpdated(worker))
+      }
+    })
+  }
+}
+
 export function requestStateChange(newStateName) {
- return (dispatch, getState) => {
-   const { taskrouter } = getState()
-   let requestedActivitySid = getActivitySid(taskrouter.activities, newStateName)
-   taskrouter.worker.update("ActivitySid", requestedActivitySid, (error, worker) => {
-     if (error) {
-       console.log(error);
-     } else {
-       dispatch(workerUpdated(worker))
-     }
-   })
- }
+  return (dispatch, getState) => {
+    const { taskrouter } = getState()
+    let requestedActivitySid = getActivitySid(taskrouter.activities, newStateName)
+    taskrouter.worker.update("ActivitySid", requestedActivitySid, (error, worker) => {
+      if (error) {
+        console.log(error);
+      } else {
+        dispatch(workerUpdated(worker))
+      }
+    })
+  }
+}
+
+export function requestWorker(workerSid) {
+  return (dispatch, getState) => {
+    console.log(workerSid)
+    dispatch(registerWorker())
+    return fetch(`/api/tokens/worker/${workerSid}`)
+      .then(response => response.text())
+      .then(token => {
+        console.log(token)
+        let worker = new Twilio.TaskRouter.Worker(token)
+        //worker.fetchChannels((error, channels) => {
+        //   dispatch(channelsUpdated(channels.data))
+        //})
+        worker.activities.fetch((error, activityList) => {
+           dispatch(activitiesUpdated(activityList.data))
+        })
+        dispatch(workerUpdated(worker))
+        worker.on("ready", (worker) => {
+          dispatch(workerUpdated(worker))
+          dispatch(requestChat(worker.attributes.contact_uri.split(':')[1]))
+          dispatch(requestPhone(worker.attributes.contact_uri.split(':')[1]))
+          console.log(worker)
+        })
+        worker.on('activity.update', (worker) => {
+          dispatch(workerUpdated(worker))
+        })
+        worker.on('token.expired', () => {
+          console.log('EXPIRED')
+          dispatch(requestWorker(workerSid))
+        })
+        worker.on('error', (error) => {
+          console.log("Websocket had an error: "+ error.response + " with message: "+error.message)
+        })
+        worker.on("disconnected", function() {
+          console.log("Websocket has disconnected");
+        })
+        worker.on('reservation.timeout', (reservation) => {
+          console.log("Reservation Timed Out")
+        })
+        worker.on('reservation.accepted', (reservation) => {
+          dispatch(reservationAccepted(reservation))
+        })
+        worker.on('reservation.created', (reservation) => {
+          console.log("Incoming reservation")
+          console.log(reservation)
+          dispatch(reservationCreated(reservation))
+          switch (reservation.task.taskChannelUniqueName) {
+            case 'voice':
+              reservation.conference()
+              break
+            case 'chat':
+              //reservation.accept()
+              dispatch(chatNewRequest(reservation.task))
+              break
+            case 'video':
+              reservation.accept()
+              dispatch(videoRequest(reservation.task))
+              break
+            case 'custom1':
+              // do nothing. server will accept
+            default:
+              reservation.reject()
+          }
+
+        })
+      })
+
+  }
 }
 
 function activitiesUpdated(activities) {
   return {
     type: 'ACTIVITIES_UPDATED',
     activities: activities
-  }		
-}
-
-export function requestWorker(workerSid) {
- return (dispatch, getState) => {
-   console.log(workerSid)
-   dispatch(registerWorker())
-   return fetch(`/api/tokens/worker/${workerSid}`)
-     .then(response => response.text())
-     .then(token => {
-       console.log(token)
-       let worker = new Twilio.TaskRouter.Worker(token)
-       //worker.fetchChannels((error, channels) => {
-       //   dispatch(channelsUpdated(channels.data))
-       //})
-       worker.activities.fetch((error, activityList) => {
-          dispatch(activitiesUpdated(activityList.data))
-       })
-       dispatch(workerUpdated(worker))
-       worker.on("ready", (worker) => {
-         dispatch(workerUpdated(worker))
-         dispatch(requestChat(worker.attributes.contact_uri.split(':')[1]))
-         console.log(worker)
-       })
-       worker.on('activity.update', (worker) => {
-         dispatch(workerUpdated(worker))
-       })
-       worker.on('token.expired', () => {
-         console.log('EXPIRED')
-         dispatch(requestWorker(workerSid))
-       })
-       worker.on('error', (error) => {
-         console.log("Websocket had an error: "+ error.response + " with message: "+error.message)
-       })
-       worker.on("disconnected", function() {
-         console.log("Websocket has disconnected");
-       })
-       worker.on('reservation.timeout', (reservation) => {
-         console.log("Reservation Timed Out")
-       })
-       worker.on('reservation.accepted', (reservation) => {
-         dispatch(reservationAccepted(reservation))
-       })
-       worker.on('reservation.created', (reservation) => {
-         console.log("Incoming reservation")
-         console.log(reservation)
-         dispatch(reservationCreated(reservation))
-         switch (reservation.task.taskChannelUniqueName) {
-           case 'voice':
-             reservation.conference()
-             break
-           case 'chat':
-             //reservation.accept()
-             dispatch(chatNewRequest(reservation.task))
-             break
-           case 'video':
-             reservation.accept()
-             dispatch(videoRequest(reservation.task))
-             break
-           case 'custom1':
-             // do nothing. server will accept
-           default:
-             reservation.reject()
-         }
-
-       })
-     })
-
- }
-}
-
-
-function activitiesUpdated(activities) {
- return {
-   type: 'ACTIVITIES_UPDATED',
-   activities: activities
- }
-}
-
-const getActivitySid = (activities, activityName) => {
- return activities.find((activity) =>
-   activity.friendlyName == activityName).sid;
+  }
 }
 
 function channelsUpdated(channels) {
@@ -132,9 +171,22 @@ export function dialPadUpdated(number) {
   }
 }
 
+function registerPhoneDevice() {
+  return {
+    type: 'REGISTER_PHONE'
+  }
+}
+
 function phoneMuted(boolean) {
   return {
     type: 'PHONE_MUTED',
+    boolean: boolean
+  }
+}
+
+function callOnHold(boolean) {
+  return {
+    type: 'CALL_ON_HOLD',
     boolean: boolean
   }
 }
@@ -158,6 +210,42 @@ export function phoneConnectionUpdated(conn) {
     type: "PHONE_CONN_UPDATED",
     connection: conn
   }
+}
+
+export function requestPhone(clientName) {
+  return (dispatch, getState) => {
+    dispatch(registerPhoneDevice())
+    return fetch(`/api/tokens/phone/${clientName}`)
+      .then(response => response.text())
+      .then(text => {
+        Twilio.Device.setup(text)
+        Twilio.Device.ready((device) => {
+          console.log("phone is ready");
+          dispatch(phoneDeviceUpdated(device))
+        })
+        Twilio.Device.incoming(function(connection) {
+          connection.accept();
+        })
+        Twilio.Device.connect((conn) => {
+          console.log("incoming call")
+          console.log(conn._direction)
+          // Call is connected. Register callback for events to make sure UI is updated
+          conn.mute((boolean, connection) => {
+            dispatch(phoneMuted(boolean))
+          })
+          conn.on('warning', (warning) => {
+            dispatch(phoneWarning(warning))
+          })
+          conn.on('warning-cleared', (warning) => {
+            dispatch(phoneWarning(" "))
+          })
+	        dispatch(phoneConnectionUpdated(conn))
+		    })
+		    Twilio.Device.disconnect((conn) => {
+	        dispatch(phoneConnectionUpdated(null))
+        })
+      })
+    }
 }
 
 // export function requestHold(callSid) {
@@ -195,6 +283,44 @@ export function phoneMute() {
   }
 }
 
+export function phoneTransfer(confName) {
+
+  return (dispatch, getState) => {
+    return fetch(`/api/calls/transfer`,
+      {
+        headers: {
+         'Accept': 'application/json',
+         'Content-Type': 'application/json'
+        },
+        method: "POST",
+        body: JSON.stringify({ client: 'tvu', confName: confName })
+      })
+      .then(response => response.json())
+      .then( json => {
+        console.log(json)
+      })
+  }
+}
+
+export function externalTransfer(confName, phoneNumber) {
+
+  return (dispatch, getState) => {
+    return fetch(`/api/calls/transfers/external`,
+      {
+        headers: {
+         'Accept': 'application/json',
+         'Content-Type': 'application/json'
+        },
+        method: "POST",
+        body: JSON.stringify({ phoneNumber: phoneNumber, confName: confName })
+      })
+      .then(response => response.json())
+      .then( json => {
+        console.log(json)
+      })
+  }
+}
+
 export function phoneButtonPushed(digit) {
   return (dispatch, getState) => {
     const { phone } = getState()
@@ -206,20 +332,28 @@ export function phoneButtonPushed(digit) {
 
 export function phoneCall() {
   return (dispatch, getState) => {
-    const { phone } = getState()
+    const { phone, taskrouter } = getState()
     console.log("call clicked to " + phone.dialPadNumber)
-    const agent_call = phone.device.connect({To: phone.dialPadNumber})
-    /*
-    return fetch(`/api/calls/outbound/dial`,
+
+    return fetch(`/api/taskrouter/outbound`,
       {
         method: "POST",
-        body: { "to": phone.dialPadNumber}
+        headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+        body:
+          JSON.stringify({
+          To: phone.dialPadNumber,
+          From: taskrouter.worker.attributes.phone_number,
+          Agent: taskrouter.worker.friendlyName
+        })
+
       })
       .then(response => response.json())
       .then( json => {
         console.log(json)
       })
-    */
   }
 }
 
@@ -315,4 +449,9 @@ export function videoRequest(task) {
       })
 
   }
+}
+
+const getActivitySid = (activities, activityName) => {
+  return activities.find((activity) =>
+    activity.friendlyName == activityName).sid;
 }

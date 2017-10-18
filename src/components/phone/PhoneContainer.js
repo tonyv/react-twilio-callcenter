@@ -20,6 +20,7 @@ const mapStateToProps = (state) => {
     muted: phone.muted,
     callSid: caller,
     confSid: conf,
+    reservation: reservation,
     warning: phone.warning
   }
 }
