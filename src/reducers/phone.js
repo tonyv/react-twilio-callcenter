@@ -29,6 +29,10 @@ const phone = (state = {
       return Object.assign({}, state, {
         muted: action.boolean
       });
+    case 'CALL_ON_HOLD':
+      return Object.assign({}, state, {
+        callOnHold: action.boolean
+      });
     case 'PHONE_WARNING':
       return Object.assign({}, state, {
         warning: action.warning
