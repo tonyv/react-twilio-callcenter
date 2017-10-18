@@ -51,38 +51,4 @@ router.post('/outbound/dial', function(req, res) {
     })
 });
 
-router.post('/transfer', function(req, res) {
-  const client = require('twilio')(config.accountSid, config.authToken);
-
-  const resp = new VoiceResponse();
-  const type = {direction: 'outbound', type: 'transfer'};
-  const json = JSON.stringify(type);
-
-  resp.enqueueTask({
-    workflowSid: config.workflowSid,
-  }).task({priority: '1'}, json)
-
-  res.send(resp.toString());
-
-  // client.taskrouter.v1
-  //   .workspaces(config.workspaceSid)
-  //   .tasks
-  //   .create({
-  //     workflowSid: config.workflowSid,
-  //     taskChannel: 'voice',
-  //     attributes: '{"direction":"outbound", type: "transfer", "client": agent_name }',
-  //   }).then((task) => {
-  //     const resp = new VoiceResponse();
-  //     const dial = resp.dial();
-  //     dial.conference({
-  //       beep: false,
-  //       waitUrl: '',
-  //       startConferenceOnEnter: true,
-  //       endConferenceOnExit: true
-  //     }, task.sid);
-  //     console.log(resp.toString())
-  //     res.send(resp.toString());
-  //   })
-});
-
 module.exports = router;
