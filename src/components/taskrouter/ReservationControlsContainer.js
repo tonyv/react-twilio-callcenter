@@ -1,4 +1,4 @@
-import { connect } from 'react  redux'
+import { connect } from 'react-redux'
 import {requestStateChange} from '../../actions'
 import SimpleAgentStatusControls from './SimpleAgentStatusControls'
 
@@ -7,7 +7,7 @@ const mapStateToProps = (state) => {
   const { taskrouter } = state
   return {
     available: taskrouter.worker.available,
-    status: taskrouter.worker.activityName,		
+    status: taskrouter.worker.activityName,
   }
 }
 
