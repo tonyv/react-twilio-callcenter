@@ -111,6 +111,44 @@ router.post('/event', function(req, res) {
   res.send({})
 })
 
+router.post('/outbound', function(req, res) {
+  //const resp = new VoiceResponse();
+  // this is an outbuond call.  Assumes the Workflow has the following target
+  /*
+  {
+    "targets": [
+      {
+        "queue": "queue sid",
+        "expression": "task.agent_name==worker.agent_name",
+        "priority": "1000"
+      }
+    ],
+    "filter_friendly_name": "outbound",
+    "expression": "direction == 'outbound'"
+  }
+  */
+  console.log(req.body)
+  const from = req.body.From
+  const to = req.body.To
+  const agent = req.body.Agent
+  const client = require('twilio')(config.accountSid, config.authToken);
+  // Create a Task on a custom channel
+  // with the Task sid that was returned place this agent leg of the call into
+  // a conference named by the task sid
+
+  client.taskrouter.v1
+    .workspaces(config.workspaceSid)
+    .tasks
+    .create({
+      workflowSid: config.workflowSid,
+      taskChannel: 'custom1',
+      attributes: JSON.stringify({direction:"outbound", agent_name: 'bcoyle', from: from, to: to}),
+    }).then((task) => {
+      console.log(task)
+    })
+    res.send({});
+});
+
 
 
 module.exports = router;

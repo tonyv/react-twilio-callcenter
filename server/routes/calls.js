@@ -85,6 +85,33 @@ router.post('/conference/:conference_sid/participant', function(req, res) {
   // res.send({});
 });
 
+router.post('/outbound/dial/:to/conf/:conference_id', function(req, res) {
+  // This endpoint is set when accepting the task with the call method
+  console.log(req.body)
+  const to = req.params.to
+  const conferenceSid = req.params.conference_id
+  const client = require('twilio')(config.accountSid, config.authToken);
+
+  client
+    .conferences(conferenceSid)
+    .participants.create({to: to, from: "2146438999", earlyMedia: "true", statusCallback: "http://thinkvoice.ngrok.io/api/taskrouter/event"})
+    .then((participant) => {
+      const resp = new VoiceResponse();
+      const dial = resp.dial();
+      dial.conference({
+        beep: false,
+        waitUrl: '',
+        startConferenceOnEnter: true,
+        endConferenceOnExit: false
+      }, conferenceSid);
+      console.log(resp.toString())
+      res.send(resp.toString());
+    })
+    .catch((error) => {
+      console.log(error)
+    })
+});
+
 router.post('/transfers/external', function(req, res) {
   const client = require('twilio')(config.accountSid, config.authToken);
 

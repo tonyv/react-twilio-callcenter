@@ -150,7 +150,18 @@ export function requestWorker(workerSid) {
               dispatch(videoRequest(reservation.task))
               break
             case 'custom1':
-              // do nothing. server will accept
+            // This is an outbound call reservation
+              const sid = reservation.task.sid
+              const to = reservation.task.attributes.to
+              reservation.call(
+                "2146438999",
+                "http://thinkvoice.ngrok.io/api/calls/outbound/dial/" + to + "/conf/" + sid,
+                "http://thinkvoice.ngrok.io/api/taskrouter/event",
+                "true",
+                "",
+                "",
+                "http://thinkvoice.ngrok.io/api/taskrouter/event"
+              )
             default:
               reservation.reject()
           }
@@ -343,20 +354,28 @@ export function phoneButtonPushed(digit) {
 
 export function phoneCall() {
   return (dispatch, getState) => {
-    const { phone } = getState()
+    const { phone, taskrouter } = getState()
     console.log("call clicked to " + phone.dialPadNumber)
-    const agent_call = phone.device.connect({To: phone.dialPadNumber})
-    /*
-    return fetch(`/api/calls/outbound/dial`,
+
+    return fetch(`/api/taskrouter/outbound`,
       {
         method: "POST",
-        body: { "to": phone.dialPadNumber}
+        headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+        body:
+          JSON.stringify({
+          To: phone.dialPadNumber,
+          From: taskrouter.worker.attributes.phone_number,
+          Agent: taskrouter.worker.friendlyName
+        })
+
       })
       .then(response => response.json())
       .then( json => {
         console.log(json)
       })
-    */
   }
 }
 
