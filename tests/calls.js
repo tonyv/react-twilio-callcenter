@@ -45,20 +45,24 @@ describe('Calls API Endpoint Tests', function() {
     })
   })
 
-  // describe('#POST /assignment on /api/taskrouter', function() {
-  //   body = { WorkerAttributes: '', TaskAttributes: '' }
-  //
-  //   it('should return JSON instruction to send task to voicemail worker', function(done) {
-  //     supertest(app).post('/api/taskrouter/assignment')
-  //       .send(JSON.stringify(body))
-  //       .set('Accept', 'application/json')
-  //       .type('form')
-  //       .end(function(err, res) {
-  //         console.log('res =>', res.body)
-  //         done()
-  //       })
-  //   })
-  // })
+  describe('#POST /assignment on /api/taskrouter', function() {
+    const instruction = 'redirect'
+    const call_sid = 'CA984f64594ab0d0a67a05df3b2c6cd440'
+    const response = { WorkerAttributes: '{"skills":["voicemail"] }',
+                TaskAttributes: '{"call_sid":"CA984f64594ab0d0a67a05df3b2c6cd440"}' }
+
+    it('should return JSON instruction to send task to voicemail worker', function(done) {
+      supertest(app).post('/api/taskrouter/assignment')
+        .send(response)
+        .set('Accept', 'application/json')
+        .type('form')
+        .end(function(err, res) {
+          expect(res.body.instruction).to.equal(instruction)
+          expect(res.body.call_sid).to.equal(call_sid)
+          done()
+        })
+    })
+  })
 
   describe('#POST /conference/:conference_sid/participant on /api/calls', function() {
     const workflowFriendlyName = 'Sales Requests'
