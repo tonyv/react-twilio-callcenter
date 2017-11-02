@@ -128,9 +128,11 @@ export function requestWorker(workerSid) {
           dispatch(reservationCreated(reservation))
           switch (reservation.task.taskChannelUniqueName) {
             case 'voice':
+              console.log('Task attributes =>', reservation.task.attributes)
               if (reservation.task.attributes.type == 'transfer') {
+                console.log('TRANSFER RECEIVED with =>', reservation.task.attributes.confName)
                 reservation.call('15304412022',
-                                 'https://041531b6.ngrok.io/api/calls/conference/' + reservation.task.attributes.confName + '/participant',
+                                 'https://17d0a5cd.ngrok.io/api/calls/conference/' + reservation.task.attributes.confName + '/participant',
                                  null,
                                  'true')
                 // reservation.redirect(reservation.task.attributes.call_sid,
@@ -155,12 +157,12 @@ export function requestWorker(workerSid) {
               const to = reservation.task.attributes.to
               reservation.call(
                 "2146438999",
-                "http://thinkvoice.ngrok.io/api/calls/outbound/dial/" + to + "/conf/" + sid,
-                "http://thinkvoice.ngrok.io/api/taskrouter/event",
+                "http://17d0a5cd.ngrok.io/api/calls/outbound/dial/" + to + "/conf/" + sid,
+                "http://17d0a5cd.ngrok.io/api/taskrouter/event",
                 "true",
                 "",
                 "",
-                "http://thinkvoice.ngrok.io/api/taskrouter/event"
+                "http://17d0a5cd.ngrok.io/api/taskrouter/event"
               )
             default:
               reservation.reject()

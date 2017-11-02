@@ -81,6 +81,7 @@ router.post('/conference/:conference_sid/participant', function(req, res) {
   //     from: '+15304412022',
   //   }).then(participant => console.log(participant.sid));
 
+  console.log('resp =>', resp.toString())
   res.send(resp.toString());
   // res.send({});
 });
@@ -94,7 +95,7 @@ router.post('/outbound/dial/:to/conf/:conference_id', function(req, res) {
 
   client
     .conferences(conferenceSid)
-    .participants.create({to: to, from: "2146438999", earlyMedia: "true", statusCallback: "http://thinkvoice.ngrok.io/api/taskrouter/event"})
+    .participants.create({to: to, from: "client:tvu", earlyMedia: "true", statusCallback: "http://thinkvoice.ngrok.io/api/taskrouter/event"})
     .then((participant) => {
       const resp = new VoiceResponse();
       const dial = resp.dial();
@@ -138,7 +139,12 @@ router.post('/transfer', function(req, res) {
                                   confName: req.body.confName}),
     }).then((task) => {
       console.log(task);
-      res.send({});
+      const body = { workflowFriendlyName: task.workflowFriendlyName,
+                     assignmentStatus: task.assignmentStatus,
+                     taskChannelUniqueName: task.taskChannelUniqueName,
+                     priority: task.priority };
+
+      res.send(body);
     });
 
   // res.send(resp.toString());
