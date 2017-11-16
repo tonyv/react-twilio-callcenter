@@ -1,6 +1,7 @@
 var twilio = require('twilio');
 var mocha = require('mocha');
 var test = require('colored-tape');
+var before = test;
 
 var supertest = require('supertest');
 const config = require('../twilio.config');
@@ -28,15 +29,14 @@ var worker_api = supertest('https://taskrouter.twilio.com/v1/Workspaces/' + conf
 // describe('Taskrouter Workflow Integration Tests', function() {
 
   // Polls `someCondition` every 1s
-  // let check = function(done) {
-  //   if (removeAllTasks()) done();
-  //   else setTimeout( function(){ removeAllTasks(done) }, 1000 );
+  // var check = function(done) {
+  //   if (allTasksRemoved()) done();
+  //   else setTimeout( function(){ workersOfflineTestsDone(done) }, 1000 );
   // }
   //
   // before(function(done) {
   //   check(done);
   // })
-
 
   // test('should create a task and end up in a task queue', function(assert) {
   //   let actual_event_types = []
@@ -252,73 +252,19 @@ var worker_api = supertest('https://taskrouter.twilio.com/v1/Workspaces/' + conf
   //     });
   // });
   //
-  test('inbound customer care call should be assigned to an available customer care agent and not a voicemail worker', function(assert) {
-    let actual_event_types = []
-    let task_priority = null
-    let reservation_description = ""
-    const expected_event_types = ['reservation.created', 'task-queue.entered', 'task.created', 'workflow.entered', 'workflow.target-matched']
-    const task_attributes = '{"direction":"inbound", "skill":"customer_care"}'
-
-    // Note: Do prechecks. Make sure workers are available in specified order
-    updateWorkerActivity(voicemail_worker, idle)
-    updateWorkerActivity(customer_care_worker, idle)
-
-    console.log('--> Creating task with attributes ' + task_attributes + '...')
-    console.log('--> Applying task to workflow ' + config.workflowSid + '...')
-
-    client.taskrouter.v1
-      .workspaces(config.workspaceSid)
-      .tasks
-      .create({
-        workflowSid: config.workflowSid,
-        attributes: task_attributes,
-        timeout: 300,
-      }).then((task) => {
-        console.log('')
-
-        taskrouter_events_api
-          .get('/')
-          .auth(config.accountSid, config.authToken)
-          .query('TaskSid=' + task.sid)
-          .expect(200)
-          .end(function(err, res) {
-            console.log('--> Retrieved events for task ' + task.sid + '...')
-
-            res.body.events.forEach((event) => {
-              actual_event_types.push(event.event_type)
-
-              if (event.event_type == 'reservation.created') {
-                // event.description should contain the following string
-                // Task <TaskSID> assigned to Worker <WorkerFriendlyName>tr with Reservation <ReservationSID>
-                reservation_description = event.description
-              }
-            });
-            assert.error(err, 'No errors using TaskRouter events API');
-            assert.equal(JSON.stringify(actual_event_types.sort()),
-                         JSON.stringify(expected_event_types.sort()),
-                         'reservation should be created and inbound customer care call should be assigned to a customer care agent')
-            assert.ok(reservation_description.includes('Task ' + task.sid + ' assigned to Worker Tony'), 'Reservation was created and assigned to the right agent')
-            removeTask(task.sid)
-            updateWorkerActivity(voicemail_worker, offline)
-            updateWorkerActivity(customer_care_worker, offline)
-            assert.end()
-          });
-      });
-  });
-
-  // test('inbound sales call should be assigned to an available agent and not a voicemail worker', function(assert) {
+  // test('inbound customer care call should be assigned to an available customer care agent and not a voicemail worker', function(assert) {
   //   let actual_event_types = []
   //   let task_priority = null
   //   let reservation_description = ""
   //   const expected_event_types = ['reservation.created', 'task-queue.entered', 'task.created', 'workflow.entered', 'workflow.target-matched']
-  //   const task_attributes = '{"direction":"inbound", "skill":"sales"}'
-  //
-  //   console.log('--> Creating task with attributes ' + task_attributes + '...')
-  //   console.log('--> Applying task to workflow ' + config.workflowSid + '...')
+  //   const task_attributes = '{"direction":"inbound", "skill":"customer_care"}'
   //
   //   // Note: Do prechecks. Make sure workers are available in specified order
   //   updateWorkerActivity(voicemail_worker, idle)
-  //   updateWorkerActivity(sales_worker, idle)
+  //   updateWorkerActivity(customer_care_worker, idle)
+  //
+  //   console.log('--> Creating task with attributes ' + task_attributes + '...')
+  //   console.log('--> Applying task to workflow ' + config.workflowSid + '...')
   //
   //   client.taskrouter.v1
   //     .workspaces(config.workspaceSid)
@@ -350,17 +296,72 @@ var worker_api = supertest('https://taskrouter.twilio.com/v1/Workspaces/' + conf
   //           assert.error(err, 'No errors using TaskRouter events API');
   //           assert.equal(JSON.stringify(actual_event_types.sort()),
   //                        JSON.stringify(expected_event_types.sort()),
-  //                        'reservation should be created and inbound sales call should be assigned to a sales agent')
-  //           assert.ok(reservation_description.includes('Task ' + task.sid + ' assigned to Worker Joe (Sales)'), 'Reservation was created and assigned to the right agent')
+  //                        'reservation should be created and inbound customer care call should be assigned to a customer care agent')
+  //           assert.ok(reservation_description.includes('Task ' + task.sid + ' assigned to Worker Tony'), 'Reservation was created and assigned to the right agent')
   //           removeTask(task.sid)
   //           updateWorkerActivity(voicemail_worker, offline)
-  //           updateWorkerActivity(sales_worker, offline)
+  //           updateWorkerActivity(customer_care_worker, offline)
   //           assert.end()
   //         });
   //     });
   // });
 
+  test('inbound sales call should be assigned to an available agent and not a voicemail worker', function(assert) {
+    let actual_event_types = []
+    let task_priority = null
+    let reservation_description = ""
+    const expected_event_types = ['reservation.created', 'task-queue.entered', 'task.created', 'workflow.entered', 'workflow.target-matched']
+    const task_attributes = '{"direction":"inbound", "skill":"sales"}'
+
+    console.log('--> Creating task with attributes ' + task_attributes + '...')
+    console.log('--> Applying task to workflow ' + config.workflowSid + '...')
+
+    // Note: Do prechecks. Make sure workers are available in specified order
+    updateWorkerActivity(voicemail_worker, idle)
+    updateWorkerActivity(sales_worker, idle)
+
+    client.taskrouter.v1
+      .workspaces(config.workspaceSid)
+      .tasks
+      .create({
+        workflowSid: config.workflowSid,
+        attributes: task_attributes,
+        timeout: 300,
+      }).then((task) => {
+        console.log('')
+
+        taskrouter_events_api
+          .get('/')
+          .auth(config.accountSid, config.authToken)
+          .query('TaskSid=' + task.sid)
+          .expect(200)
+          .end(function(err, res) {
+            console.log('--> Retrieved events for task ' + task.sid + '...')
+
+            res.body.events.forEach((event) => {
+              actual_event_types.push(event.event_type)
+
+              if (event.event_type == 'reservation.created') {
+                // event.description should contain the following string
+                // Task <TaskSID> assigned to Worker <WorkerFriendlyName>tr with Reservation <ReservationSID>
+                reservation_description = event.description
+              }
+            });
+            assert.error(err, 'No errors using TaskRouter events API');
+            assert.equal(JSON.stringify(actual_event_types.sort()),
+                         JSON.stringify(expected_event_types.sort()),
+                         'reservation should be created and inbound sales call should be assigned to a sales agent')
+            assert.ok(reservation_description.includes('Task ' + task.sid + ' assigned to Worker Joe (Sales)'), 'Reservation was created and assigned to the right agent')
+            // removeTask(task.sid)
+            updateWorkerActivity(voicemail_worker, offline)
+            updateWorkerActivity(customer_care_worker, offline)
+            assert.end()
+          });
+      });
+  });
+
   // test('should assign task to voicemail worker if all agents are offline', function(assert) {
+  //   removeAllTasks()
   //   let actual_event_types = []
   //   let reservation_description = ""
   //   const expected_event_types = ['task-queue.entered', 'task.created', 'workflow.entered', 'workflow.target-matched', 'reservation.created']
@@ -411,20 +412,6 @@ var worker_api = supertest('https://taskrouter.twilio.com/v1/Workspaces/' + conf
   // });
 // });
 
-function beforeEach(test, handler) {
-  return function tapish(name, listener) {
-  test(name, function (assert) {
-    var _end = assert.end
-    assert.end = function () {
-        assert.end = _end
-        listener(assert)
-      }
-
-      handler(assert)
-    })
-  }
-}
-
 function createWorker(type, name) {
   client.taskrouter.v1.workspaces(config.workspaceSid).workers.create({
     friendlyName: type.charAt(0).toUpperCase() + type.slice(1) + ' Worker 1',
@@ -451,10 +438,8 @@ function updateWorkerActivity(workerSid, activity) {
     });
 }
 
-function removeAllTasks() {
-
+function removeAllTasks(assert) {
   console.log('--> Removing ALL tasks...')
-
   client.taskrouter.v1
     .workspaces(config.workspaceSid)
     .tasks

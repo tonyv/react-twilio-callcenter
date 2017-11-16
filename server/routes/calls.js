@@ -58,7 +58,7 @@ router.post('/outbound/dial', function(req, res) {
         startConferenceOnEnter: true,
         endConferenceOnExit: true
       }, task.sid);
-      console.log(resp.toString())
+      // console.log(resp.toString())
       res.send(resp.toString());
     })
 });
@@ -81,14 +81,14 @@ router.post('/conference/:conference_sid/participant', function(req, res) {
   //     from: '+15304412022',
   //   }).then(participant => console.log(participant.sid));
 
-  console.log('resp =>', resp.toString())
+  // console.log('resp =>', resp.toString())
   res.send(resp.toString());
   // res.send({});
 });
 
 router.post('/outbound/dial/:to/conf/:conference_id', function(req, res) {
   // This endpoint is set when accepting the task with the call method
-  console.log(req.body)
+  // console.log(req.body)
   const to = req.params.to
   const conferenceSid = req.params.conference_id
   const client = require('twilio')(config.accountSid, config.authToken);
@@ -105,7 +105,7 @@ router.post('/outbound/dial/:to/conf/:conference_id', function(req, res) {
         startConferenceOnEnter: true,
         endConferenceOnExit: false
       }, conferenceSid);
-      console.log(resp.toString())
+      // console.log(resp.toString())
       res.send(resp.toString());
     })
     .catch((error) => {
@@ -138,7 +138,7 @@ router.post('/transfer', function(req, res) {
                                   agent_id:"tony",
                                   confName: req.body.confName}),
     }).then((task) => {
-      console.log(task);
+      // console.log(task);
       const body = { workflowFriendlyName: task.workflowFriendlyName,
                      assignmentStatus: task.assignmentStatus,
                      taskChannelUniqueName: task.taskChannelUniqueName,
