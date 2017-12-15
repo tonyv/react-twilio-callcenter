@@ -46,25 +46,36 @@ test('should assign a task created from a transfer call to the right agent', fun
     }).then((task) => {
       console.log('')
 
-      taskrouter_events_api
-        .get('/')
-        .auth(config.accountSid, config.authToken)
-        .query('TaskSid=' + task.sid)
-        .expect(200)
-        .end(function(err, res) {
-          console.log('--> Retrieved events for task ' + task.sid + '...')
+      setTimeout(function () {
+        taskrouter_events_api
+          .get('/')
+          .auth(config.accountSid, config.authToken)
+          .query('TaskSid=' + task.sid)
+          .expect(200)
+          .end(function(err, res) {
+            console.log('--> Retrieved events for task ' + task.sid + '...')
 
-          res.body.events.forEach((event) => actual_event_types.push(event.event_type));
-          assert.error(err, 'No errors using TaskRouter events API');
-          assert.equal(JSON.stringify(actual_event_types.sort()),
-                       JSON.stringify(expected_event_types.sort()),
-                       'Reservation was created for a transfer task and assigned to the right agent')
-          removeTask(task.sid)
-          updateWorkerActivity(customer_care_worker2, offline)
-          updateWorkerActivity(customer_care_worker, offline)
-          updateWorkerActivity(voicemail_worker, offline)
-          assert.end()
-        });
+            res.body.events.forEach((event) => {
+              actual_event_types.push(event.event_type)
+
+              if (event.event_type == 'reservation.created') {
+                worker_assigned = event.event_data.worker_sid
+              }
+            });
+
+            assert.error(err, 'No errors using TaskRouter events API');
+            assert.equal(JSON.stringify(actual_event_types.sort()),
+                         JSON.stringify(expected_event_types.sort()),
+                         'Reservation was created for a transfer task and assigned to the right agent')
+            assert.equal(worker_assigned, customer_care_worker, 'Reservation was assigned to the right agent')
+
+            removeTask(task.sid)
+            updateWorkerActivity(customer_care_worker2, offline)
+            updateWorkerActivity(customer_care_worker, offline)
+            updateWorkerActivity(voicemail_worker, offline)
+            assert.end()
+          });
+      }, 1000);
     });
 });
 

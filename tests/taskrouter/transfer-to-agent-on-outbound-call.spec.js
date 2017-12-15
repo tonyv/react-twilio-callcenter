@@ -25,10 +25,12 @@ test('should not transfer a call to an agent on an outbound call', function(asse
   let actual_event_types = []
   const expected_event_types_for_outbound = ['reservation.created', 'task-queue.entered', 'task.created', 'workflow.entered', 'workflow.target-matched']
   const expected_event_types_for_transfer = ['task-queue.entered', 'task.created', 'workflow.entered', 'workflow.target-matched']
-  const transfer_task_attributes = '{"type":"transfer","agent_id":"tony"}'
+  const transfer_task_attributes = '{"type":"transfer","agent_id":"brian"}'
   const outbound_task_attributes = '{"direction":"outbound", "agent_name":"brian"}'
+  let reservation_sid = ''
 
   updateWorkerActivity(customer_care_worker2, idle)
+  updateWorkerActivity(customer_care_worker, idle)
   updateWorkerActivity(voicemail_worker, idle)
 
   console.log('--> Creating task with attributes ' + outbound_task_attributes + '...')
@@ -46,54 +48,84 @@ test('should not transfer a call to an agent on an outbound call', function(asse
       console.log('--> Retrieving events for task ' + task.sid + '...')
       console.log('')
 
-      taskrouter_events_api
-        .get('/')
-        .auth(config.accountSid, config.authToken)
-        .query('TaskSid=' + task.sid)
-        .expect(200)
-        .end(function(err, res) {
-          res.body.events.forEach((event) => actual_event_types.push(event.event_type));
-          assert.error(err, 'No errors using TaskRouter events API');
-          assert.equal(JSON.stringify(actual_event_types.sort()),
-                       JSON.stringify(expected_event_types_for_outbound.sort()),
-                       'outbound call should be assigned to an agent')
-          // removeTask(task.sid)
-          // Notes: Complete the task here and assert event reservation created for the next task
-        });
+      setTimeout(function () {
+        taskrouter_events_api
+          .get('/')
+          .auth(config.accountSid, config.authToken)
+          .query('TaskSid=' + task.sid)
+          .expect(200)
+          .end(function(err, res) {
+            res.body.events.forEach((event) => {
+              actual_event_types.push(event.event_type)
+
+              if (event.event_type == 'reservation.created') {
+                worker_assigned = event.event_data.worker_sid
+                reservation_sid = event.event_data.reservation_sid
+              }
+            });
+
+            assert.error(err, 'No errors using TaskRouter events API');
+            assert.equal(JSON.stringify(actual_event_types.sort()),
+                         JSON.stringify(expected_event_types_for_outbound.sort()),
+                         'outbound call should be assigned to an agent')
+            assert.equal(worker_assigned, customer_care_worker2, 'Reservation was assigned to the right agent')
+
+            client.taskrouter.v1
+              .workspaces(config.workspaceSid)
+              .tasks(task.sid)
+              .reservations(reservation_sid)
+              .update('accepted')
+
+            // removeTask(task.sid)
+            // Notes: Complete the task here and assert event reservation created for the next task
+          });
+      }, 1000);
     });
 
-  console.log('--> Creating task with attributes ' + transfer_task_attributes + '...')
-  console.log('--> Applying task to workflow ' + config.workflowSid + '...')
+  setTimeout(function () {
+    console.log('--> Creating task with attributes ' + transfer_task_attributes + '...')
+    console.log('--> Applying task to workflow ' + config.workflowSid + '...')
 
-  client.taskrouter.v1
-    .workspaces(config.workspaceSid)
-    .tasks
-    .create({
-      workflowSid: config.workflowSid,
-      attributes: transfer_task_attributes,
-      timeout: 300,
-    }).then((task) => {
-      console.log('--> Retrieving events for task ' + task.sid + '...')
-      console.log('')
-      actual_event_types = []
+    client.taskrouter.v1
+      .workspaces(config.workspaceSid)
+      .tasks
+      .create({
+        workflowSid: config.workflowSid,
+        attributes: transfer_task_attributes,
+        timeout: 300,
+      }).then((task) => {
+        console.log('--> Retrieving events for task ' + task.sid + '...')
+        console.log('')
+        actual_event_types = []
 
-      taskrouter_events_api
-        .get('/')
-        .auth(config.accountSid, config.authToken)
-        .query('TaskSid=' + task.sid)
-        .expect(200)
-        .end(function(err, res) {
-          res.body.events.forEach((event) => actual_event_types.push(event.event_type));
-          assert.error(err, 'No errors using TaskRouter events API');
-          assert.equal(JSON.stringify(actual_event_types.sort()),
-                       JSON.stringify(expected_event_types_for_transfer.sort()),
-                       'should receive events ' + expected_event_types_for_transfer.sort())
-          // removeTask(task.sid)
-          updateWorkerActivity(customer_care_worker2, offline)
-          updateWorkerActivity(voicemail_worker, offline)
-          assert.end()
-        });
-    });
+        setTimeout(function () {
+          taskrouter_events_api
+            .get('/')
+            .auth(config.accountSid, config.authToken)
+            .query('TaskSid=' + task.sid)
+            .expect(200)
+            .end(function(err, res) {
+              res.body.events.forEach((event) => {
+                actual_event_types.push(event.event_type)
+
+                if (event.event_type == 'reservation.created') {
+                  worker_assigned = event.event_data.worker_sid
+                }
+              });
+
+              assert.error(err, 'No errors using TaskRouter events API');
+              assert.equal(JSON.stringify(actual_event_types.sort()),
+                           JSON.stringify(expected_event_types_for_transfer.sort()),
+                           'should receive events ' + expected_event_types_for_transfer.sort())
+              // removeTask(task.sid)
+              updateWorkerActivity(customer_care_worker2, offline)
+              updateWorkerActivity(customer_care_worker, offline)
+              updateWorkerActivity(voicemail_worker, offline)
+              assert.end()
+            });
+        }, 1000);
+      });
+  }, 5000);
 });
 
 function updateWorkerActivity(workerSid, activity) {

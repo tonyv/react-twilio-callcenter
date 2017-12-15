@@ -23,7 +23,6 @@ var worker_api = supertest('https://taskrouter.twilio.com/v1/Workspaces/' + conf
 
 test('should assign task to voicemail worker if all agents are offline', function(assert) {
   let actual_event_types = []
-  let reservation_description = ""
   const expected_event_types = ['task-queue.entered', 'task.created', 'workflow.entered', 'workflow.target-matched', 'reservation.created']
   const task_attributes = '{"skill":"customer_care"}'
 
@@ -46,29 +45,31 @@ test('should assign task to voicemail worker if all agents are offline', functio
       console.log('--> Retrieving events for task ' + task.sid + '...')
       console.log('')
 
-      taskrouter_events_api
-        .get('/')
-        .auth(config.accountSid, config.authToken)
-        .query('TaskSid=' + task.sid)
-        .expect(200)
-        .end(function(err, res) {
-          res.body.events.forEach((event) => {
-            actual_event_types.push(event.event_type)
-            if (event.event_type == 'reservation.created') {
-              // event.description should contain the following string
-              // Task <TaskSID> assigned to Worker <WorkerFriendlyName>tr with Reservation <ReservationSID>
-              reservation_description = event.description
-            }
-          })
-          assert.error(err, 'No errors using TaskRouter events API');
-          assert.equal(JSON.stringify(actual_event_types.sort()),
-                       JSON.stringify(expected_event_types.sort()),
-                       'should receive events ' + expected_event_types)
-          assert.ok(reservation_description.includes('Task ' + task.sid + ' assigned to Worker Voicemail'), 'Reservation was created and assigned to Worker Voicemail')
-          removeTask(task.sid)
-          updateWorkerActivity(voicemail_worker, offline)
-          assert.end()
-        });
+      setTimeout(function () {
+        taskrouter_events_api
+          .get('/')
+          .auth(config.accountSid, config.authToken)
+          .query('TaskSid=' + task.sid)
+          .expect(200)
+          .end(function(err, res) {
+            res.body.events.forEach((event) => {
+              actual_event_types.push(event.event_type)
+              if (event.event_type == 'reservation.created') {
+                worker_assigned = event.event_data.worker_sid
+              }
+            })
+
+            assert.error(err, 'No errors using TaskRouter events API');
+            assert.equal(JSON.stringify(actual_event_types.sort()),
+                         JSON.stringify(expected_event_types.sort()),
+                         'should receive events ' + expected_event_types)
+            assert.equal(worker_assigned, customer_care_worker, 'Reservation was assigned to the right agent')
+
+            removeTask(task.sid)
+            updateWorkerActivity(voicemail_worker, offline)
+            assert.end()
+          });
+      }, 1000);
     });
 });
 

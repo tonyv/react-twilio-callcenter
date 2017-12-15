@@ -43,20 +43,22 @@ test('should create a task and end up in a task queue', function(assert) {
       console.log('--> Retrieving events for task ' + task.sid + '...')
       console.log('')
 
-      taskrouter_events_api
-        .get('/')
-        .auth(config.accountSid, config.authToken)
-        .query('TaskSid=' + task.sid)
-        .expect(200)
-        .end(function(err, res) {
-          res.body.events.forEach((event) => actual_event_types.push(event.event_type));
-          assert.error(err, 'No errors using TaskRouter events API');
-          assert.equal(JSON.stringify(actual_event_types.sort()),
-                       JSON.stringify(expected_event_types.sort()),
-                       'should receive events ' + JSON.stringify(expected_event_types))
-          removeTask(task.sid)
-          assert.end()
-        });
+      setTimeout(function () {
+        taskrouter_events_api
+          .get('/')
+          .auth(config.accountSid, config.authToken)
+          .query('TaskSid=' + task.sid)
+          .expect(200)
+          .end(function(err, res) {
+            res.body.events.forEach((event) => actual_event_types.push(event.event_type));
+            assert.error(err, 'No errors using TaskRouter events API');
+            assert.equal(JSON.stringify(actual_event_types.sort()),
+                         JSON.stringify(expected_event_types.sort()),
+                         'should receive events ' + JSON.stringify(expected_event_types))
+            removeTask(task.sid)
+            assert.end()
+          });
+      }, 1000);
     });
 });
 
