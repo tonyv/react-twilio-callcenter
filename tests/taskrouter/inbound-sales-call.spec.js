@@ -68,7 +68,7 @@ test('inbound sales call should be assigned to an available agent and not a voic
             assert.equal(JSON.stringify(actual_event_types.sort()),
                          JSON.stringify(expected_event_types.sort()),
                          'reservation should be created and inbound sales call should be assigned to a sales agent')
-            assert.equal(worker_assigned, customer_care_worker, 'Reservation was assigned to the right agent')
+            assert.equal(worker_assigned, sales_worker, 'Reservation was assigned to the right agent')
 
             removeTask(task.sid)
             updateWorkerActivity(voicemail_worker, offline)

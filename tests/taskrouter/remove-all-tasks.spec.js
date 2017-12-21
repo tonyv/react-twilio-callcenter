@@ -20,7 +20,10 @@ test('remove all tasks', function(assert) {
           .tasks(task.sid)
           .remove()
       });
-      assert.equal(tasks.length, 0, "All tasks removed")
-      assert.end()
+      setTimeout(function(){
+        assert.equal(tasks.length, 0, "All tasks removed")
+        assert.end()
+      }, 2000)
+
     });
 });

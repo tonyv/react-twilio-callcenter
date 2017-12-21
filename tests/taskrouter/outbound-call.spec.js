@@ -28,7 +28,7 @@ test('outbound call should have the highest priority and be assigned to the righ
   let actual_event_types = []
   let task_priority = null
   const expected_event_types = ['reservation.created', 'task-queue.entered', 'task.created', 'workflow.entered', 'workflow.target-matched']
-  const task_attributes = '{"direction":"outbound", "agent_name":"tony"}'
+  const task_attributes = '{"direction":"outbound", "agent":"tvu"}'
 
   // Note: Do prechecks. Make sure workers are available in specified order
   updateWorkerActivity(voicemail_worker, idle)
@@ -69,7 +69,7 @@ test('outbound call should have the highest priority and be assigned to the righ
             assert.equal(JSON.stringify(actual_event_types.sort()),
                          JSON.stringify(expected_event_types.sort()),
                          'reservation should be created and outbound call should be assigned to an agent')
-            assert.equal(task_priority, '1000', 'tasks for outbound calls should have a high priority over all other tasks')
+            assert.equal(task.priority, 1000, 'tasks for outbound calls should have a high priority over all other tasks')
             assert.equal(worker_assigned, customer_care_worker, 'Reservation was assigned to the right agent')
 
             removeTask(task.sid)
@@ -77,7 +77,7 @@ test('outbound call should have the highest priority and be assigned to the righ
             updateWorkerActivity(customer_care_worker, offline)
             assert.end()
           });
-      }, 1000);
+      }, 2000);
     });
 });
 

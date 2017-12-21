@@ -63,7 +63,7 @@ test('should assign task to voicemail worker if all agents are offline', functio
             assert.equal(JSON.stringify(actual_event_types.sort()),
                          JSON.stringify(expected_event_types.sort()),
                          'should receive events ' + expected_event_types)
-            assert.equal(worker_assigned, customer_care_worker, 'Reservation was assigned to the right agent')
+            assert.equal(worker_assigned, voicemail_worker, 'Reservation was assigned to the right agent')
 
             removeTask(task.sid)
             updateWorkerActivity(voicemail_worker, offline)
